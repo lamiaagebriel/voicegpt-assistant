@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es5", // or your preferred target
+    "module": "commonjs", // or "esnext" based on your module strategy
+    "jsx": "preserve", // Set to "preserve", "react", or "react-jsx"
+    "strict": true, // Enables all strict type-checking options
+    "esModuleInterop": true, // Enables emit interoperability between CommonJS and ES Modules
+    "skipLibCheck": true, // Optional: skips type checking of declaration files
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"], // Adjust based on your folder structure
+  "exclude": ["node_modules", "dist"]
+}
