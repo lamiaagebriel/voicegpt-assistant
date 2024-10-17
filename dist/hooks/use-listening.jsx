@@ -4,7 +4,7 @@ exports.useSpeechRecognition = exports.createSpeechRecognition = void 0;
 const react_1 = require("react");
 const createSpeechRecognition = ({ onResult, onError, options = {}, // Optional options
  }) => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window === null || window === void 0 ? void 0 : window.SpeechRecognition) || (window === null || window === void 0 ? void 0 : window.webkitSpeechRecognition);
     if (!SpeechRecognition) {
         throw new Error("Speech Recognition is not supported in this browser.");
     }

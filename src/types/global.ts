@@ -1,5 +1,4 @@
-declare global {
-  type SiriMessage =
+export type SiriMessage =
     | {
         role: "system" | "user" | "assistant";
         content: string;
@@ -8,7 +7,4 @@ declare global {
         role: "function";
         name: string;
         content: string;
-      };
-}
-
-export {SiriMessage};
+      }; 

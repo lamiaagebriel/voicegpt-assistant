@@ -1,9 +1,7 @@
  
 import { useEffect, useRef, useState } from "react";
-
-
-
-
+import { SpeechRecognitionEvent, Window, SpeechRecognitionErrorEvent } from "../types";
+ 
 export const createSpeechRecognition = ({
   onResult,
   onError,
@@ -17,7 +15,7 @@ export const createSpeechRecognition = ({
   options?: Partial<Window["SpeechRecognition"]>; // Use Partial to allow flexibility
 }) => {
   const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+    (window as unknown as Window)?.SpeechRecognition || (window as unknown as Window)?.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
     throw new Error("Speech Recognition is not supported in this browser.");

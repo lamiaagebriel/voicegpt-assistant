@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SiriMessage } from "../types";
 
 export const useConversation = (key: string) => {
   const [messages, setMessages] = useState<SiriMessage[]>([]);

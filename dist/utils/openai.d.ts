@@ -1,5 +1,6 @@
 import { ClientOptions, OpenAI as OpenAIConfigure } from "openai";
 import { ChatCompletionCreateParams } from "openai/resources/index";
+import { SiriMessage } from "../types";
 export declare const OpenAI: ({ configure, functions, }: {
     configure?: ClientOptions;
     functions?: (ChatCompletionCreateParams.Function & {

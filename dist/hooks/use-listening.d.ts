@@ -1,3 +1,4 @@
+import { Window } from "../types";
 export declare const createSpeechRecognition: ({ onResult, onError, options, }: {
     onResult: (result: {
         transcript: string;
