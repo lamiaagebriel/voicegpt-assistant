@@ -1,7 +1,6 @@
 import { ClientOptions, OpenAI as OpenAIConfigure } from "openai";
 import { ChatCompletionCreateParams } from "openai/resources/index";
-
-export * from "openai"
+ 
 export const OpenAI = ({
   configure,
   functions,
