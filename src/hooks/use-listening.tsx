@@ -1,7 +1,44 @@
- 
 import { useEffect, useRef, useState } from "react";
-import { SpeechRecognitionEvent, Window, SpeechRecognitionErrorEvent } from "../types";
- 
+import { SpeechRecognitionEvent, Window } from "../types";
+
+// Utility function to check microphone permission
+const checkMicrophonePermission = async () => {
+  if (navigator.permissions) {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+
+      if (permissionStatus.state === 'granted') {
+        return true; // Permission is granted
+      } else if (permissionStatus.state === 'denied') {
+        alert('Microphone access has been denied. Please enable it in your browser settings.');
+        return false; // Permission denied
+      } else {
+        // Permission state is 'prompt'
+        return requestMicrophoneAccess();
+      }
+    } catch (error) {
+      console.error("Error checking microphone permission:", error);
+      return false;
+    }
+  } else {
+    // Permissions API not supported, fallback to requesting access
+    return requestMicrophoneAccess();
+  }
+};
+
+const requestMicrophoneAccess = () => {
+  return new Promise((resolve) => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(() => {
+        resolve(true); // Permission granted
+      })
+      .catch(() => {
+        alert('Microphone access is required for voice recognition.');
+        resolve(false); // Permission denied
+      });
+  });
+};
+
 export const createSpeechRecognition = ({
   onResult,
   onError,
@@ -46,9 +83,6 @@ export const createSpeechRecognition = ({
   return recognition;
 };
 
-
- 
-
 export const useSpeechRecognition = ({
   key,
   recognitionOptions,
@@ -65,14 +99,22 @@ export const useSpeechRecognition = ({
 
   useEffect(() => {
     if (!open && key) {
-      startPassiveListening();
+      initPassiveListening();
     }
-    if (open && listening) startListening(); // If no key, directly start listening
+    if (open && listening) initActiveListening(); // If no key, directly start listening
 
     return () => {
       recognitionRef.current?.stop();
     };
   }, [listening, open]);
+
+  // Initialize passive listening to detect the key phrase
+  const initPassiveListening = async () => {
+    const hasPermission = await checkMicrophonePermission();
+    if (hasPermission) {
+      startPassiveListening();
+    }
+  };
 
   // Passive listening to detect the key phrase
   const startPassiveListening = () => {
@@ -86,13 +128,18 @@ export const useSpeechRecognition = ({
           );
         }
       },
-      onError: (error) => {
-        setError(`Speech recognition error: ${error.message}`);
-        console.error("Speech recognition error:", error);
-      },
+      onError: handleRecognitionError,
       options: recognitionOptions, // Custom options passed into speech recognition
     });
     recognitionRef.current?.start();
+  };
+
+  // Initialize active listening
+  const initActiveListening = async () => {
+    const hasPermission = await checkMicrophonePermission();
+    if (hasPermission) {
+      startListening();
+    }
   };
 
   // Actively listen to capture speech input
@@ -104,11 +151,7 @@ export const useSpeechRecognition = ({
         setTranscript(transcript); // Capture the transcript
         setIsRecording(false); // Set recording state to false when done
       },
-      onError: (error) => {
-        setError(`Speech recognition error: ${error.message}`);
-        console.error("Speech recognition error:", error);
-        setIsRecording(false); // Stop recording on error
-      },
+      onError: handleRecognitionError,
       options: recognitionOptions,
     });
     recognitionRef.current.start();
@@ -122,6 +165,19 @@ export const useSpeechRecognition = ({
     setIsRecording(false); // Stop recording
   };
 
+  // Handle recognition errors
+  const handleRecognitionError = (error: any) => {
+    console.error("Speech recognition error:", error);
+
+    if (error === "not-allowed") {
+      setError("Microphone access is blocked. Please allow microphone access in your browser settings.");
+    } else if (error === "network") {
+      setError("Network error detected. Please check your internet connection.");
+    } else {
+      setError(`Speech recognition error: ${error.message}`);
+    }
+  };
+
   return {
     listening, // Listening state
     setListening, // Method to manually set listening state
@@ -133,8 +189,8 @@ export const useSpeechRecognition = ({
     error, // Any errors encountered
     setError,
     isRecording, // Whether recording is active
-    startListening, // Start the active listening process
+    startListening: initActiveListening, // Start the active listening process
     stopListening, // Stop listening
-    startPassiveListening, // Start listening passively for the key phrase
+    startPassiveListening: initPassiveListening, // Start listening passively for the key phrase
   };
 };
